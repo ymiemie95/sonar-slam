@@ -1,9 +1,9 @@
-# sonar_slam
+# sonar-slam
 
 Project page for the manuscript *Real-Time Pose-Graph SLAM with a Low-Cost
 Mechanical Scanning Sonar in Shallow, Reverberant Waters*.
 
-**Page:** https://ymiemie95.github.io/sonar_slam/ — the supplementary video.
+**Page:** https://ymiemie95.github.io/sonar-slam/ — the supplementary video.
 
 ## Source code
 
