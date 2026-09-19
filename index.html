@@ -4,108 +4,405 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sonar SLAM</title>
-<meta name="description" content="Supplementary video for the manuscript on real-time pose-graph SLAM with a low-cost mechanical scanning sonar.">
+<meta name="description" content="Real-time underwater SLAM from sparse geometric scans of a low-cost mechanical scanning sonar: supplementary video, results and datasets.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Real-Time Pose-Graph SLAM with a Low-Cost Mechanical Scanning Sonar">
-<meta property="og:description" content="Supplementary video: four sequences mapped online during a 1x real-time replay.">
+<meta property="og:title" content="Real-Time Underwater SLAM with Sparse Geometric Scans">
+<meta property="og:description" content="Eighteen recordings across six underwater scenes. Trajectory error 43-91% below the released baseline, at 0.1-0.4% processing load.">
 <meta property="og:image" content="https://ymiemie95.github.io/sonar-slam/assets/poster.jpg">
 <meta property="og:url" content="https://ymiemie95.github.io/sonar-slam/">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
 <style>
   :root{
-    --bg:#f7f8fa; --panel:#ffffff; --ink:#16213e; --text:#374151; --muted:#6b7280;
-    --line:#e3e6ec; --accent:#1f77b4; --accent-ink:#ffffff; --soft:#eef4fa;
+    --bg:#f6f7f9; --panel:#ffffff; --sunk:#eef3f8;
+    --ink:#132039; --text:#3d4757; --muted:#6d7888; --faint:#8b95a5;
+    --line:#e0e5ec; --rule:#cbd3de;
+    --accent:#1f6f9e; --accent-soft:#e7f0f7; --accent-ink:#ffffff;
+    --good:#1f7a5a;
+    --serif:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+    --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#0f1420; --panel:#171d2b; --ink:#e8ecf5; --text:#c9d1e0; --muted:#94a0b8;
-      --line:#2a3245; --accent:#5aa9e6; --accent-ink:#0b1220; --soft:#1b2537;
+      --bg:#0d1420; --panel:#151d2c; --sunk:#1a2434;
+      --ink:#e9edf4; --text:#c3ccda; --muted:#8e9aab; --faint:#78849a;
+      --line:#26303f; --rule:#354154;
+      --accent:#68b0da; --accent-soft:#182838; --accent-ink:#08121d;
+      --good:#5fc59c;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#0f1420; --panel:#171d2b; --ink:#e8ecf5; --text:#c9d1e0; --muted:#94a0b8;
-    --line:#2a3245; --accent:#5aa9e6; --accent-ink:#0b1220; --soft:#1b2537;
+    --bg:#0d1420; --panel:#151d2c; --sunk:#1a2434;
+    --ink:#e9edf4; --text:#c3ccda; --muted:#8e9aab; --faint:#78849a;
+    --line:#26303f; --rule:#354154;
+    --accent:#68b0da; --accent-soft:#182838; --accent-ink:#08121d;
+    --good:#5fc59c;
   }
   *{box-sizing:border-box}
-  body{
-    margin:0; background:var(--bg); color:var(--text);
-    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-    display:flex; flex-direction:column; align-items:center; min-height:100vh;
-  }
-  main{width:100%; max-width:1000px; padding:56px 20px 40px; display:flex; flex-direction:column; gap:26px}
-  h1{
-    margin:0; font-size:clamp(22px,3.2vw,31px); line-height:1.25; color:var(--ink);
-    text-align:center; text-wrap:balance; letter-spacing:-.01em;
-  }
-  .sub{margin:0; text-align:center; color:var(--muted); font-size:15px}
-  .player{
-    background:#000; border-radius:12px; overflow:hidden;
-    box-shadow:0 12px 34px rgba(16,24,44,.16); border:1px solid var(--line);
-  }
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--text); font:16px/1.65 var(--sans); -webkit-font-smoothing:antialiased}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1060px; margin:0 auto; padding:0 22px}
+
+  nav{position:sticky; top:0; z-index:9; background:color-mix(in srgb,var(--bg) 90%,transparent);
+      backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex; align-items:center; gap:22px; height:50px; overflow-x:auto; white-space:nowrap;
+            scrollbar-width:none}
+  nav .wrap::-webkit-scrollbar{display:none}
+  nav .brand{font-family:var(--serif); font-weight:600; color:var(--ink); margin-right:auto; font-size:16px}
+  nav a:not(.brand){font-size:13.5px; font-weight:500; color:var(--muted); letter-spacing:.01em}
+  nav a:not(.brand):hover{color:var(--accent); text-decoration:none}
+
+  header{padding:64px 0 42px; text-align:center}
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+           color:var(--faint); margin:0 0 18px}
+  h1{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.7vw,42px); line-height:1.2;
+     color:var(--ink); margin:0 auto 20px; max-width:900px; text-wrap:balance; letter-spacing:-.005em}
+  .byline{margin:0 0 6px; color:var(--text); font-size:16px}
+  .affil{margin:0 0 24px; color:var(--muted); font-size:14.5px}
+  .btns{display:flex; flex-wrap:wrap; justify-content:center; gap:10px}
+  .btn{display:inline-flex; align-items:center; gap:8px; padding:10px 19px; border-radius:7px;
+       font-size:14.5px; font-weight:500; border:1px solid var(--line); background:var(--panel); color:var(--ink)}
+  .btn:hover{text-decoration:none; border-color:var(--accent); color:var(--accent)}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+  .btn.primary:hover{color:var(--accent-ink); filter:brightness(1.07)}
+  .btn.off{background:var(--sunk); color:var(--faint); cursor:default; border-style:dashed}
+  .btn.off:hover{border-color:var(--line); color:var(--faint)}
+  .btn svg{width:17px; height:17px; fill:currentColor; flex:none}
+
+  section{padding:48px 0; border-top:1px solid var(--line)}
+  h2{font-family:var(--serif); font-weight:600; font-size:25px; color:var(--ink); margin:0 0 6px; letter-spacing:-.005em}
+  .lede{margin:0 0 26px; color:var(--muted); font-size:15px}
+  h3{font-size:16px; font-weight:600; color:var(--ink); margin:30px 0 10px}
+  p{margin:0 0 15px; max-width:68ch}
+
+  .player{background:#000; border-radius:10px; overflow:hidden; border:1px solid var(--line);
+          box-shadow:0 16px 40px rgba(12,22,40,.16)}
   .player video{display:block; width:100%; aspect-ratio:16/9; background:#000}
-  .caption{margin:0; text-align:center; color:var(--muted); font-size:14px}
-  .links{display:flex; flex-wrap:wrap; justify-content:center; gap:12px}
-  .link{
-    display:inline-flex; align-items:center; gap:9px; padding:11px 20px; border-radius:999px;
-    font-weight:600; font-size:15px; text-decoration:none; border:1px solid transparent;
+  .vidnote{margin:14px auto 0; text-align:center; color:var(--muted); font-size:14px; max-width:78ch}
+
+  .tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:0 0 4px}
+  .tile{background:var(--accent-soft); border-radius:10px; padding:20px 22px}
+  .tile .k{font-family:var(--mono); font-weight:600; font-size:27px; color:var(--accent); line-height:1.1;
+           display:block; margin-bottom:9px; letter-spacing:-.02em}
+  .tile .v{font-size:14px; color:var(--text); display:block}
+  .tile .c{font-size:12.5px; color:var(--muted); display:block; margin-top:6px}
+
+  .contrib{display:grid; gap:2px; counter-reset:c}
+  .contrib li{list-style:none; display:grid; grid-template-columns:34px 1fr; gap:16px;
+              padding:15px 0; border-bottom:1px solid var(--line)}
+  .contrib li:last-child{border-bottom:0}
+  .contrib li::before{counter-increment:c; content:counter(c); font-family:var(--mono); font-size:13px;
+                      color:var(--accent); padding-top:2px}
+  .contrib b{display:block; color:var(--ink); font-weight:600; margin-bottom:3px}
+  .contrib span{color:var(--text); font-size:15px}
+
+  figure{margin:0 0 6px}
+  figure img{display:block; width:100%; height:auto; border-radius:8px; background:#fff; border:1px solid var(--line)}
+  figcaption{font-size:13.5px; color:var(--muted); margin-top:10px; max-width:80ch}
+  .duo{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+  .plots{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; align-items:end}
+  .plots img{border:0; background:transparent}
+
+  .tbl{overflow-x:auto; border:1px solid var(--line); border-radius:9px; background:var(--panel)}
+  table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:520px}
+  caption{caption-side:top; text-align:left; padding:13px 16px 11px; font-size:13px; color:var(--muted);
+          border-bottom:1px solid var(--line)}
+  th,td{padding:7px 14px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-size:11.5px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.07em;
+           background:var(--sunk); border-bottom:1px solid var(--rule)}
+  tbody td{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--text)}
+  tbody td:first-child{font-family:var(--sans); font-size:14.5px; color:var(--ink)}
+  tbody tr:last-child td{border-bottom:0}
+  td.best{color:var(--accent); font-weight:600}
+  tr.group td{text-align:left; font-family:var(--sans); font-size:12.5px; color:var(--muted);
+              background:var(--sunk); letter-spacing:.02em}
+  tr.sum td{border-top:1px solid var(--rule); font-weight:600; color:var(--ink); background:var(--sunk)}
+  tr.sum td:first-child{font-weight:600}
+  tr.sum td[colspan]{text-align:center}
+
+  .note{font-size:13.5px; color:var(--muted); max-width:80ch}
+  .pending{background:var(--sunk); border-left:3px solid var(--accent); border-radius:0 9px 9px 0;
+           padding:16px 20px; margin:0 0 20px}
+  .pending b{color:var(--ink)}
+  .lic{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px}
+  .lic div{border:1px solid var(--line); border-radius:9px; padding:14px 16px; background:var(--panel)}
+  .lic b{display:block; font-family:var(--mono); font-size:13.5px; color:var(--ink); margin-bottom:5px}
+  .lic span{font-size:13.5px; color:var(--muted)}
+  .tag{font-family:var(--mono); font-size:11px; padding:2px 7px; border-radius:4px;
+       background:var(--accent-soft); color:var(--accent); margin-left:6px; white-space:nowrap}
+  pre{background:var(--sunk); border:1px solid var(--line); border-radius:9px; padding:15px 17px;
+      overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.6; margin:0 0 15px; color:var(--text)}
+
+  footer{padding:34px 0 60px; border-top:1px solid var(--line); color:var(--muted); font-size:13.5px; text-align:center}
+  @media (max-width:820px){
+    .tiles,.lic{grid-template-columns:1fr}
+    .duo{grid-template-columns:1fr}
+    .plots{grid-template-columns:repeat(2,1fr)}
   }
-  .link svg{width:18px; height:18px; fill:currentColor; flex:none}
-  .link.solid{background:var(--accent); color:var(--accent-ink)}
-  .link.solid:hover{filter:brightness(1.08)}
-  .link.quiet{background:var(--panel); color:var(--ink); border-color:var(--line)}
-  .link.quiet:hover{border-color:var(--accent); color:var(--accent)}
-  .link.off{background:var(--soft); color:var(--muted); cursor:default}
-  .link:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
-  .repo{
-    background:var(--panel); border:1px solid var(--line); border-radius:12px;
-    padding:16px 20px; display:flex; flex-wrap:wrap; align-items:center;
-    justify-content:center; gap:8px 12px; text-align:center;
-  }
-  .repo code{
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:14.5px;
-    color:var(--ink); background:var(--soft); padding:3px 9px; border-radius:6px;
-  }
-  .repo span{font-size:14px; color:var(--muted)}
-  footer{padding:0 20px 46px; color:var(--muted); font-size:13px; text-align:center}
 </style>
 </head>
 <body>
 
-<main>
-  <h1>Real-Time Pose-Graph SLAM with a Low-Cost Mechanical Scanning Sonar in Shallow, Reverberant Waters</h1>
-  <p class="sub">Supplementary video</p>
+<nav><div class="wrap">
+  <a class="brand" href="#top">Sonar SLAM</a>
+  <a href="#video">Video</a>
+  <a href="#abstract">Abstract</a>
+  <a href="#system">System</a>
+  <a href="#results">Results</a>
+  <a href="#maps">Maps</a>
+  <a href="#data">Data</a>
+  <a href="#code">Code</a>
+</div></nav>
 
+<header id="top" class="wrap">
+  <p class="eyebrow">Manuscript under review</p>
+  <h1>Real-Time Underwater SLAM with Sparse Geometric Scans from a Low-Cost Mechanical Scanning Sonar</h1>
+  <!-- TODO: fill in authors and affiliation before submission -->
+  <p class="byline">Authors to be announced</p>
+  <p class="affil">Affiliation to be announced</p>
+  <div class="btns">
+    <a class="btn primary" href="#video">
+      <svg viewBox="0 0 24 24"><path d="M4 5h12a2 2 0 0 1 2 2v2.5l4-2.5v10l-4-2.5V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>
+      Video</a>
+    <a class="btn" href="#results">
+      <svg viewBox="0 0 24 24"><path d="M3 20h18v2H3zM5 10h3v8H5zm5.5-5h3v13h-3zM16 13h3v5h-3z"/></svg>
+      Results</a>
+    <a class="btn" href="#data">
+      <svg viewBox="0 0 24 24"><path d="M12 3c4.97 0 9 1.34 9 3s-4.03 3-9 3-9-1.34-9-3 4.03-3 9-3zm9 6v3c0 1.66-4.03 3-9 3s-9-1.34-9-3V9c1.9 1.3 5.3 2 9 2s7.1-.7 9-2zm0 6v3c0 1.66-4.03 3-9 3s-9-1.34-9-3v-3c1.9 1.3 5.3 2 9 2s7.1-.7 9-2z"/></svg>
+      Datasets</a>
+    <!-- TODO: swap .off span for <a class="btn" href="https://github.com/ymiemie95/sonar-slam"> once public -->
+    <span class="btn off" title="Released upon publication">
+      <svg viewBox="0 0 24 24"><path d="M12 .5A11.5 11.5 0 0 0 .5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
+      Code (upon publication)</span>
+  </div>
+</header>
+
+<section id="video"><div class="wrap">
   <div class="player">
     <video controls preload="metadata" playsinline poster="assets/poster.jpg">
       <source src="assets/supplementary.mp4" type="video/mp4">
       Your browser cannot play this video. <a href="assets/supplementary.mp4">Download the MP4</a>.
     </video>
   </div>
-
-  <p class="caption">
-    Four sequences on one screen, each mapped online during a 1&times; real-time replay of the recorded data.
-    The screen recordings are accelerated; every panel shows its own playback factor and elapsed real time.
+  <p class="vidnote">
+    Supplementary video. Four recordings run side by side, each mapped online during a 1&times; real-time replay of the
+    recorded data. The screen captures are accelerated and every panel shows its own playback factor and elapsed real time.
+    <a href="assets/supplementary.mp4" download>Download MP4</a>, 1080p, 1:28, no audio.
   </p>
+</div></section>
 
-  <div class="links">
-    <a class="link solid" href="assets/supplementary.mp4" download>
-      <svg viewBox="0 0 24 24"><path d="M12 3v10.2l3.6-3.6 1.4 1.4-6 6-6-6 1.4-1.4 3.6 3.6V3zM4 19h16v2H4z"/></svg>
-      Download video
-    </a>
-    <!-- TODO: swap .off span for <a class="link quiet" href="https://github.com/ymiemie95/sonar-slam"> once public -->
-    <span class="link off" title="Released upon publication">
-      <svg viewBox="0 0 24 24"><path d="M12 .5A11.5 11.5 0 0 0 .5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
-      Code (upon publication)
-    </span>
+<section id="abstract"><div class="wrap">
+  <h2>Abstract</h2>
+  <p class="lede">Underwater inspection needs localization and mapping that survive turbidity, darkness and reverberation.</p>
+  <p>A mechanical scanning imaging sonar sees through water that blinds cameras, at a fraction of the cost, size and power
+  of a multibeam sonar. It also acquires one beam at a time, so a full revolution takes tens of seconds and the returns
+  arrive asynchronously while the vehicle moves. We present a real-time underwater SLAM system built around that
+  constraint rather than against it.</p>
+  <p>Our front end extracts at most one range point per beam. Odometry from a Doppler velocity log and an inertial
+  measurement unit supports beam-wise motion compensation, and an angular sliding window accumulates the compensated
+  points into pseudo laser scans with a wide field of view. Spatial filtering removes isolated sonar points. Correlative
+  scan matching and loop detection then establish constraints under acceptance rules adapted to acoustic match responses,
+  and sparse pose-graph optimization corrects the trajectory.</p>
+  <p>We evaluate on eighteen recordings across six scenes, fourteen of which carry a reference trajectory.</p>
+
+  <div class="tiles" style="margin-top:26px">
+    <div class="tile">
+      <span class="k">43&ndash;91%</span>
+      <span class="v">lower absolute trajectory error than the released baseline</span>
+      <span class="c">on all 14 recordings with a reference trajectory</span>
+    </div>
+    <div class="tile">
+      <span class="k">79 / 78%</span>
+      <span class="v">boundary completeness and precision, against 68 / 55% released</span>
+      <span class="c">mean over the 9 recordings all three systems mapped</span>
+    </div>
+    <div class="tile">
+      <span class="k">0.1&ndash;0.4%</span>
+      <span class="v">processing load, against 8&ndash;48% for the re-tuned baseline</span>
+      <span class="c">both systems keep up with the recordings</span>
+    </div>
   </div>
+</div></section>
 
-  <div class="repo">
-    <code>github.com/ymiemie95/sonar-slam</code>
-    <span>ROS 2 workspace, released here when the manuscript is accepted.</span>
+<section id="system"><div class="wrap">
+  <h2>System</h2>
+  <p class="lede">From asynchronous beams to an optimized pose graph.</p>
+  <figure>
+    <img src="assets/pipeline.jpg" alt="Pipeline from sensors through the EKF, per-beam echo extraction, wide field-of-view scan formation, to matching and pose-graph optimization" loading="lazy">
+    <figcaption>Sensors feed a loosely coupled filter at 200&nbsp;Hz. Echo extraction keeps one range per beam. A moving
+    angular window forms one wide field-of-view observation, deskewed to the newest beam. Matching and pose-graph
+    optimization produce the occupancy grid and the trajectory.</figcaption>
+  </figure>
+
+  <h3>Contributions</h3>
+  <ol class="contrib">
+    <li><div><b>Sonar front end</b><span>Converts asynchronous beam-wise returns into motion-compensated sparse geometric scans.</span></div></li>
+    <li><div><b>Online SLAM system</b><span>Integrates that front end with constraint acceptance rules adapted to acoustic match responses.</span></div></li>
+    <li><div><b>Geometric evaluation protocol</b><span>Scores occupancy and echo-intensity maps against known boundaries, specifying range coverage and threshold selection, together with recordings from four underwater scenes.</span></div></li>
+  </ol>
+</div></section>
+
+<section id="results"><div class="wrap">
+  <h2>Results</h2>
+  <p class="lede">Two baselines: the released open-source implementation, and the same code after our own parameter search.</p>
+
+  <div class="tbl"><table>
+    <caption>Absolute trajectory error, translational RMSE in metres after SE(3) alignment against the reference trajectory. Lower is better; best per row in colour.</caption>
+    <thead><tr><th>Recording</th><th>Ours</th><th>SOFFT re-tuned</th><th>SOFFT released</th></tr></thead>
+    <tbody>
+      <tr class="group"><td colspan="4">Public benchmark, motion-capture reference</td></tr>
+      <tr><td>P1</td><td>0.175</td><td class="best">0.160</td><td>0.438</td></tr>
+      <tr><td>P2</td><td>0.389</td><td class="best">0.150</td><td>0.708</td></tr>
+      <tr><td>P3</td><td class="best">0.091</td><td>0.129</td><td>0.296</td></tr>
+      <tr><td>P4</td><td>0.151</td><td class="best">0.124</td><td>0.410</td></tr>
+      <tr><td>P5</td><td class="best">0.470</td><td>1.977</td><td>2.710</td></tr>
+      <tr><td>P6</td><td class="best">0.454</td><td>3.522</td><td>2.560</td></tr>
+      <tr><td>P7</td><td class="best">1.033</td><td>3.625</td><td>2.094</td></tr>
+      <tr><td>P8</td><td class="best">1.036</td><td>3.836</td><td>3.292</td></tr>
+      <tr><td>P9</td><td>0.099</td><td class="best">0.081</td><td>0.451</td></tr>
+      <tr><td>P10</td><td class="best">0.410</td><td>1.044</td><td>1.246</td></tr>
+      <tr><td>P11</td><td class="best">0.116</td><td>0.118</td><td>0.316</td></tr>
+      <tr><td>P12</td><td class="best">0.071</td><td>0.074</td><td>0.210</td></tr>
+      <tr><td>P13</td><td class="best">0.307</td><td>0.817</td><td>3.247</td></tr>
+      <tr class="group"><td colspan="4">Field water, TagSLAM reference</td></tr>
+      <tr><td>F1</td><td class="best">0.072</td><td>0.079</td><td>0.125</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Map geometry</h3>
+  <p>A map is scored against the known boundary of the scene. Completeness is the share of the true boundary that the map
+  recovers, precision the share of mapped wall cells that fall on it. Echo-intensity maps are cut at the threshold that
+  favours them most, so the comparison does not hinge on a choice we made for the baseline.</p>
+
+  <div class="tbl"><table>
+    <caption>Boundary completeness and precision in percent, on the nine recordings that all three systems mapped. Higher is better.</caption>
+    <thead><tr><th>Recording</th><th>Ours compl.</th><th>Ours prec.</th><th>Tuned compl.</th><th>Tuned prec.</th><th>Released compl.</th><th>Released prec.</th></tr></thead>
+    <tbody>
+      <tr><td>P1</td><td class="best">80</td><td class="best">75</td><td>72</td><td>70</td><td>61</td><td>64</td></tr>
+      <tr><td>P2</td><td>79</td><td class="best">81</td><td>79</td><td>66</td><td>90</td><td>30</td></tr>
+      <tr><td>P3</td><td class="best">85</td><td class="best">80</td><td>76</td><td>77</td><td>70</td><td>70</td></tr>
+      <tr><td>P4</td><td>74</td><td class="best">86</td><td>75</td><td>69</td><td>77</td><td>63</td></tr>
+      <tr><td>P9</td><td class="best">85</td><td class="best">86</td><td>73</td><td>84</td><td>65</td><td>48</td></tr>
+      <tr><td>P10</td><td class="best">51</td><td class="best">55</td><td>43</td><td>14</td><td>29</td><td>16</td></tr>
+      <tr><td>P11</td><td class="best">92</td><td class="best">75</td><td>73</td><td>74</td><td>71</td><td>66</td></tr>
+      <tr><td>P12</td><td>68</td><td class="best">83</td><td>66</td><td>77</td><td>69</td><td>66</td></tr>
+      <tr><td>F1</td><td class="best">97</td><td class="best">79</td><td>81</td><td>66</td><td>82</td><td>70</td></tr>
+      <tr class="sum"><td>Mean</td><td>79</td><td>78</td><td>71</td><td>66</td><td>68</td><td>55</td></tr>
+      <tr class="sum"><td>Maps built, of 18</td><td colspan="2">17</td><td colspan="2">11</td><td colspan="2">10</td></tr>
+    </tbody>
+  </table></div>
+
+  <figure style="margin-top:26px">
+    <img src="assets/map_metric.jpg" alt="Left: one echo map cut at three thresholds. Right: the scoring geometry for completeness and precision" loading="lazy">
+    <figcaption>Map scoring on synthetic maps. A low threshold thickens the wall and keeps clutter, a high one erodes it,
+    and the best trades one against the other, whereas a trinary occupancy grid returns the same wall at any threshold.</figcaption>
+  </figure>
+
+  <h3>Trajectories</h3>
+  <div class="plots">
+    <img src="assets/traj_P3.png" alt="P3 trajectory against the motion-capture reference" loading="lazy">
+    <img src="assets/err_P3.png" alt="P3 error over time" loading="lazy">
+    <img src="assets/traj_F1.png" alt="F1 trajectory against the TagSLAM reference" loading="lazy">
+    <img src="assets/err_F1.png" alt="F1 error over time" loading="lazy">
   </div>
-</main>
+  <p class="note" style="margin-top:12px">P3 in the test basin and F1 in the laboratory pool, each against its reference
+  trajectory, with the error evolving over the recording.</p>
 
-<footer>Project page for the manuscript above.</footer>
+  <h3>Runtime</h3>
+  <p>Processing load is the share of the recording duration spent computing. Our system stays between 0.1% and 0.4% across
+  all eighteen recordings. The re-tuned baseline ranges from 8% on the bunker to 48% on the fastest basin recording. Both
+  keep up with a 1&times; replay, but the margin differs by two orders of magnitude.</p>
+</div></section>
+
+<section id="maps"><div class="wrap">
+  <h2>Maps</h2>
+  <p class="lede">Every recording, every system, same rendering.</p>
+  <figure>
+    <img src="assets/maps_all.jpg" alt="Occupancy and echo maps with trajectories for all eighteen recordings, three rows per group: ours, re-tuned baseline, released baseline" loading="lazy">
+    <figcaption>Final maps and trajectories on all eighteen recordings. Rows within each block are ours, the re-tuned
+    baseline and the released baseline. Ours returns a trinary occupancy grid, the baselines an echo-intensity map.</figcaption>
+  </figure>
+</div></section>
+
+<section id="data"><div class="wrap">
+  <h2>Datasets</h2>
+  <p class="lede">Eighteen recordings, six scenes, sonar ranges from 3 to 30 metres.</p>
+  <figure>
+    <img src="assets/scenes.jpg" alt="Photographs of the six evaluation scenes" loading="lazy">
+    <figcaption>The six scenes. The saltwater test basin that hosts P1 to P13, the flooded bunker B1, and the four water
+    bodies recorded with our own platform: the laboratory pool F1, the pond F2, and the rectangular and irregular tiled
+    pools F3 and F4.</figcaption>
+  </figure>
+
+  <div class="tbl" style="margin-top:22px"><table>
+    <caption>Recording configurations. Step is the sonar angular increment; speed is the vehicle motion profile.</caption>
+    <thead><tr><th>ID</th><th>Scene</th><th>Size [m]</th><th>Range [m]</th><th>Step [deg]</th><th>Reference</th></tr></thead>
+    <tbody>
+      <tr class="group"><td colspan="6">Public benchmark, Bremen MSS</td></tr>
+      <tr><td>P1&ndash;P4</td><td>saltwater basin</td><td>23 &times; 19</td><td>15</td><td>0.9 / 3.6</td><td>motion capture</td></tr>
+      <tr><td>P5&ndash;P8</td><td>saltwater basin</td><td>23 &times; 19</td><td>7</td><td>0.9 / 3.6</td><td>motion capture</td></tr>
+      <tr><td>P9&ndash;P11</td><td>basin, second sonar</td><td>23 &times; 19</td><td>7&ndash;20</td><td>0.9</td><td>motion capture</td></tr>
+      <tr><td>P12, P13</td><td>basin, dynamic</td><td>23 &times; 19</td><td>7 / 15</td><td>1.8</td><td>motion capture</td></tr>
+      <tr><td>B1</td><td>flooded bunker</td><td>corridor</td><td>20</td><td>0.9</td><td>none</td></tr>
+      <tr class="group"><td colspan="6">Recorded with our platform</td></tr>
+      <tr><td>F1</td><td>laboratory pool</td><td>2 &times; 3</td><td>3</td><td>3.6</td><td>TagSLAM</td></tr>
+      <tr><td>F2</td><td>outdoor pond</td><td>63 &times; 16</td><td>30</td><td>3.6</td><td>tape</td></tr>
+      <tr><td>F3</td><td>rectangular tiled pool</td><td>5.5 &times; 2.25</td><td>4</td><td>3.6</td><td>tape</td></tr>
+      <tr><td>F4</td><td>irregular tiled pool</td><td>5.5 &times; 1.8</td><td>4</td><td>3.6</td><td>tape</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="duo" style="margin-top:26px">
+    <figure>
+      <img src="assets/platform.jpg" alt="The vehicle, operator laptop and tether reel at the outdoor pond" loading="lazy">
+      <figcaption>Deployment at the pond F2. The platform is a BlueROV2 carrying a Ping360 sonar, a Doppler velocity log
+      and an inertial measurement unit.</figcaption>
+    </figure>
+    <div>
+      <h3 style="margin-top:0">Public data</h3>
+      <p class="note">P1 to P13 are the Bremen mechanical scanning sonar benchmark by Hansen, Belenis, Bande Firvida,
+      Creutz and Birk, <a href="https://doi.org/10.1109/ACCESS.2024.3420766">IEEE Access 2024</a>. B1 is the flooded
+      bunker recording released with SOFFT-SLAM by Hansen and Birk,
+      <a href="https://doi.org/10.1109/ICRA57147.2024.10609976">ICRA 2024</a>.</p>
+      <h3>Our recordings</h3>
+      <p class="note">F1 to F4 are new. They will be released with the paper, together with the evaluation scripts and the
+      per-recording configurations, so the numbers above can be reproduced end to end.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="code"><div class="wrap">
+  <h2>Code and data</h2>
+  <div class="pending">
+    <b>Released here upon publication.</b> The ROS 2 workspace is prepared and licensed. It is held back only until the
+    manuscript is accepted, and will appear at <span style="font-family:var(--mono);font-size:13.5px">github.com/ymiemie95/sonar-slam</span>
+    together with the four field recordings, the evaluation protocol and every per-recording configuration.
+  </div>
+  <div class="lic">
+    <div><b>sonar_slam_frontend<span class="tag">BSD-3</span></b><span>Echo extraction and motion-compensated scan formation. Ours.</span></div>
+    <div><b>sonar_slam_backend<span class="tag">LGPL-2.1</span></b><span>Pose-graph back end, with the constraint acceptance layer adapted to acoustic responses.</span></div>
+    <div><b>sofft_slam<span class="tag">GPL-3</span></b><span>The SOFFT-SLAM baseline, kept so the comparison can be rerun.</span></div>
+  </div>
+  <h3>Reproducing a run</h3>
+<pre>source /opt/ros/foxy/setup.bash
+colcon build --symlink-install &amp;&amp; source install/setup.bash
+
+ros2 launch launch/full_slam_run.py     # pipeline and viewer
+ros2 bag play data/P3_DataSet03         # 1x replay of one recording</pre>
+  <p class="note">Trajectory error is scored with <span style="font-family:var(--mono)">evo_ape tum --align</span> against
+  the reference, and map geometry with the evaluation scripts that ship with the release.</p>
+</div></section>
+
+<footer><div class="wrap">
+  Project page for the manuscript above. Baseline: SOFFT-SLAM by Hansen and Birk. The pose-graph back end builds on
+  SLAM Toolbox by Macenski and Jambrecic.
+</div></footer>
 
 </body>
 </html>
